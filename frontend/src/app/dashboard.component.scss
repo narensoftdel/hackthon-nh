@@ -1,3 +1,97 @@
+.bad-floor {
+  background: #ffebee !important;
+  border: 2px solid #d32f2f !important;
+}
+.bad-floor-label {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+.testing-btn {
+  background: #fffde7;
+  color: #bfa600;
+  border: 1.5px solid #ffe082;
+  border-radius: 16px;
+  padding: 0.2em 1.1em;
+  font-size: 0.98em;
+  font-weight: 600;
+  margin-right: 0.2em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.testing-btn.active {
+  background: #c8e6c9;
+  color: #1b5e20;
+  border: 1.5px solid #81c784;
+}
+.icon-back-btn {
+  display: inline-flex;
+  align-items: center;
+  background: #e3f2fd;
+  color: #1565c0;
+  border: none;
+  border-radius: 24px;
+  padding: 0.5em 1.2em 0.5em 0.9em;
+  font-size: 1.08em;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 1.2em;
+}
+.icon-back-btn:hover {
+  background: #bbdefb;
+  color: #0d47a1;
+}
+.dashboard-flex {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+.dashboard-left {
+  width: 40vw;
+  max-width: 40vw;
+  background: rgba(255,255,255,0.85);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.10);
+  padding: 2rem 1.5rem 2rem 2rem;
+  margin-right: 0;
+  min-height: 80vh;
+  overflow-y: auto;
+}
+.dashboard-right {
+  width: 60vw;
+  max-width: 60vw;
+}
+.accordion-list {
+  margin-top: 1.5rem;
+}
+.accordion-item {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background: #f1f8e9;
+  box-shadow: 0 1px 4px rgba(44, 62, 80, 0.07);
+}
+.accordion-header {
+  padding: 0.7em 1em;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: 600;
+  background: #c8e6c9;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  transition: background 0.2s;
+}
+.accordion-header.open, .accordion-header:hover {
+  background: #a5d6a7;
+}
+.accordion-body {
+  padding: 0.7em 1.2em 1em 2.2em;
+  background: #f9fbe7;
+  border-radius: 0 0 8px 8px;
+  font-size: 1em;
+}
 .sensor-icon {
   font-size: 2.2rem;
   margin-bottom: 0.5rem;

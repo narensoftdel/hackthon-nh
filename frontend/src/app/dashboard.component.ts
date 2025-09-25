@@ -12,6 +12,9 @@ import { SensorService } from './services/sensor.service';
 
 
 export class DashboardComponent implements OnInit, OnDestroy {
+  buildingExpanded = true;
+  floorAccordion: boolean[] = [];
+  floorTesting: boolean[] = [];
   sensorData: any[] = [];
   users: any[] = [];
   loading = true;
@@ -51,6 +54,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.fetchSensorData();
     this.startPolling();
+    // Initialize accordion and testing state for each floor
+    this.floorAccordion = Array(this.sensorData.length).fill(false);
+    this.floorTesting = Array(this.sensorData.length).fill(false);
   }
 
   startPolling() {
@@ -63,6 +69,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.stopPolling();
         return;
       }
+      // If any floor is in testing mode, skip sending emails for that floor (frontend only)
+      // (Backend logic is needed for full enforcement)
+      // Just fetch data as usual
       this.fetchSensorData();
     }, 10000);
   }
@@ -85,11 +94,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: (data: any) => {
         this.sensorData = data.floors || [];
         this.users = data.users || [];
+        this.floorTesting = data.floorTesting || Array(this.sensorData.length).fill(false);
         this.loading = false;
+        // Re-initialize accordion state if floor count changes
+        if (this.floorAccordion.length !== this.sensorData.length) {
+          this.floorAccordion = Array(this.sensorData.length).fill(false);
+        }
       },
       error: (err: any) => {
         this.error = 'Failed to load sensor data';
         this.loading = false;
+      }
+    });
+  }
+
+  toggleTesting(i: number) {
+    const floorNum = i + 1;
+    const newTesting = !this.floorTesting[i];
+    this.sensorService.setFloorTesting(floorNum, newTesting).subscribe({
+      next: () => {
+        this.fetchSensorData();
+      },
+      error: () => {
+        this.error = 'Failed to update testing state.';
       }
     });
   }
@@ -162,5 +189,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showBuildingView() {
     this.selectedFloor = null;
     this.startPolling();
+  }
+
+  resetFloor() {
+    if (this.selectedFloor == null) return;
+    this.alarmEmailStatus = 'Resetting...';
+    this.sensorService.resetFloor(this.selectedFloor).subscribe({
+      next: (res) => {
+        this.alarmEmailStatus = res.message || 'Floor reset.';
+        this.fetchSensorData();
+        this.startPolling();
+      },
+      error: (err) => {
+        this.alarmEmailStatus = 'Failed to reset floor.';
+      }
+    });
+  }
+
+  // Returns true if any sensor for the floor is in 'poor' status
+  isFloorBad(idx: number): boolean {
+    const floor = this.sensorData && this.sensorData[idx];
+    if (!floor) return false;
+    if (this.getCardStatus('tvoc', floor.tvoc) === 'poor') return true;
+    if (this.getCardStatus('co2', floor.co2) === 'poor') return true;
+    if (this.getCardStatus('temperature', floor.temperature) === 'poor') return true;
+    if (floor.fireAlarm) return true;
+    if (floor.smokeDetected) return true;
+    return false;
   }
 }

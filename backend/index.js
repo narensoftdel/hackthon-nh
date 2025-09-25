@@ -13,18 +13,38 @@ const transporter = nodemailer.createTransport({
 function sendWarningEmail(to, floor, type, value) {
 	let subject = '';
 	let text = '';
+	let html = '';
 	if (type === 'temperature') {
 		subject = `Temperature Alert for Floor ${floor}`;
 		text = `Warning: The temperature on floor ${floor} has reached ${value.toFixed(2)}°C. Please take necessary action.`;
+		html = `
+		<div style="font-family: Arial, sans-serif; background: #f7f7f7; padding: 24px; border-radius: 10px; max-width: 480px; margin: auto;">
+		  <h2 style="color: #d84315;">Temperature Alert 🚨</h2>
+		  <p style="font-size: 1.1em; color: #333;">The temperature on <b>Floor ${floor}</b> has reached <span style='color:#d84315;font-weight:bold;'>${value.toFixed(2)}°C</span>.</p>
+		  <p style="color: #444;">Please take necessary action to ensure safety.</p>
+		  <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+		  <div style="font-size:0.95em; color:#888;">Emergency Evacuation System</div>
+		</div>
+		`;
 	} else if (type === 'fireAlarm') {
 		subject = `FIRE ALARM ACTIVE on Floor ${floor}`;
 		text = `URGENT: The fire alarm is ACTIVE on floor ${floor}. Please evacuate immediately!`;
+		html = `
+		<div style="font-family: Arial, sans-serif; background: #fff3e0; padding: 24px; border-radius: 10px; max-width: 480px; margin: auto; border: 2px solid #ff7043;">
+		  <h2 style="color: #b71c1c;">🔥 FIRE ALARM ACTIVE</h2>
+		  <p style="font-size: 1.1em; color: #b71c1c;">The fire alarm is <b>ACTIVE</b> on <b>Floor ${floor}</b>.</p>
+		  <p style="color: #b71c1c; font-weight: bold;">Please evacuate immediately!</p>
+		  <hr style="border:none; border-top:1px solid #ff7043; margin:16px 0;">
+		  <div style="font-size:0.95em; color:#888;">Emergency Evacuation System</div>
+		</div>
+		`;
 	}
 	const mailOptions = {
 		from: 'wadkardeepak111@gmail.com',
 		to,
 		subject,
-		text
+		text,
+		html
 	};
 	transporter.sendMail(mailOptions, (error, info) => {
 		if (error) {
@@ -41,12 +61,12 @@ function checkAndSendTemperatureWarnings() {
 		const floorUsers = users.filter(u => u.floor === floorNum);
 		if (floorData.temperature > 30) {
 			floorUsers.forEach(user => {
-				sendWarningEmail(user.email, floorNum, 'temperature', floorData.temperature);
+				// sendWarningEmail(user.email, floorNum, 'temperature', floorData.temperature);
 			});
 		}
 		if (floorData.fireAlarm) {
 			floorUsers.forEach(user => {
-				sendWarningEmail(user.email, floorNum, 'fireAlarm', true);
+				// sendWarningEmail(user.email, floorNum, 'fireAlarm', true);
 			});
 		}
 	});
@@ -75,13 +95,28 @@ app.post('/api/send-alarm-email', (req, res) => {
 	const text = status === 'active'
 		? 'URGENT: The fire alarm is ACTIVE. Please evacuate immediately!'
 		: 'Info: The fire alarm is now INACTIVE. Situation is under control.';
+	const html = status === 'active'
+		? `<div style="font-family: Arial, sans-serif; background: #fff3e0; padding: 24px; border-radius: 10px; max-width: 480px; margin: auto; border: 2px solid #ff7043;">
+			  <h2 style=\"color: #b71c1c;\">🔥 FIRE ALARM ACTIVE</h2>
+			  <p style=\"font-size: 1.1em; color: #b71c1c;\">The fire alarm is <b>ACTIVE</b> in the building.</p>
+			  <p style=\"color: #b71c1c; font-weight: bold;\">Please evacuate immediately!</p>
+			  <hr style=\"border:none; border-top:1px solid #ff7043; margin:16px 0;\">
+			  <div style=\"font-size:0.95em; color:#888;\">Emergency Evacuation System</div>
+			</div>`
+		: `<div style="font-family: Arial, sans-serif; background: #f7f7f7; padding: 24px; border-radius: 10px; max-width: 480px; margin: auto;">
+			  <h2 style=\"color: #388e3c;\">Fire Alarm Inactive</h2>
+			  <p style=\"font-size: 1.1em; color: #333;\">The fire alarm is now <b>INACTIVE</b>. Situation is under control.</p>
+			  <hr style=\"border:none; border-top:1px solid #eee; margin:16px 0;\">
+			  <div style=\"font-size:0.95em; color:#888;\">Emergency Evacuation System</div>
+			</div>`;
 	let sent = 0;
 	users.forEach(user => {
 		const mailOptions = {
 			from: 'wadkardeepak111@gmail.com',
 			to: user.email,
 			subject,
-			text
+			text,
+			html
 		};
 		transporter.sendMail(mailOptions, (error, info) => {
 			if (error) {
@@ -116,28 +151,55 @@ function randomizeFloorData(floor) {
 		lastUpdated: new Date().toISOString()
 	};
 }
+// Track testing state for each floor (true = testing, no mails)
+let floorTesting = [false, false, false];
+
 
 // Randomize dummy data for each floor every 5 seconds
 setInterval(() => {
-	sensorData = [
-		randomizeFloorData(1),
-		randomizeFloorData(2),
-		randomizeFloorData(3)
-	];
-	checkAndSendTemperatureWarnings();
+	for (let idx = 0; idx < sensorData.length; idx++) {
+		if (floorTesting[idx]) continue; // skip if testing
+		// Update sensor data for this floor
+		sensorData[idx] = randomizeFloorData(idx + 1);
+		// Email logic (if needed, e.g. for demo)
+		const floorNum = idx + 1;
+		const floorUsers = users.filter(u => u.floor === floorNum);
+		const floorData = sensorData[idx];
+		if (floorData.temperature > 30) {
+			floorUsers.forEach(user => {
+				//sendWarningEmail(user.email, floorNum, 'temperature', floorData.temperature);
+			});
+		}
+		if (floorData.fireAlarm) {
+			floorUsers.forEach(user => {
+				//sendWarningEmail(user.email, floorNum, 'fireAlarm', true);
+			});
+		}
+	}
 }, 5000);
 
-// API endpoint to get current sensor data for all floors and user list
+
 app.get('/api/sensors', (req, res) => {
 	res.json({
 		floors: sensorData,
-		users: users
+		users: users,
+		floorTesting: floorTesting
 	});
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
 	res.json({ status: 'ok', time: new Date().toISOString() });
+});
+// API endpoint to set testing state for a floor
+// Usage: POST /api/floor-testing { floor: 1 | 2 | 3, testing: true | false }
+app.post('/api/floor-testing', (req, res) => {
+	const { floor, testing } = req.body;
+	if (![1, 2, 3].includes(floor) || typeof testing !== 'boolean') {
+		return res.status(400).json({ error: 'Invalid floor or testing value' });
+	}
+	floorTesting[floor - 1] = testing;
+	res.json({ message: `Testing for floor ${floor} set to ${testing}` });
 });
 
 app.listen(PORT, () => {

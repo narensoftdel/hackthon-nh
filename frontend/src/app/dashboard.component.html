@@ -1,50 +1,58 @@
-<div class="dashboard">
-  <h2>Sensor Dashboard</h2>
-  <div *ngIf="loading">Loading...</div>
-  <div *ngIf="error">{{ error }}</div>
-  <div *ngIf="!loading && !error">
-    <div class="building-view" *ngIf="selectedFloor === null">
-      <h3>Building Level View (Averages)</h3>
-      <div class="card-container">
-        <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData())" [ngClass]="sensor.status">
-          <div class="sensor-icon">{{ sensor.icon }}</div>
-          <div class="sensor-type">{{ sensor.label }}</div>
-          <div class="sensor-value">{{ sensor.value }}</div>
-          <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+<div class="dashboard dashboard-flex">
+  <div class="dashboard-left">
+    <h2>Floors & Users</h2>
+    <div class="accordion-list">
+      <div class="accordion-item" *ngFor="let floor of sensorData; let i = index">
+        <div class="accordion-header" (click)="floorAccordion[i] = !floorAccordion[i]" [class.open]="floorAccordion[i]" [class.bad-floor]="isFloorBad(i)">
+          <span class="floor-label" [class.bad-floor-label]="isFloorBad(i)" style="font-weight:600; font-size:1.1em; cursor:pointer;">
+            🏢 Floor {{ i + 1 }}
+          </span>
+          <span class="arrow-icon" (click)="selectFloor(i+1); $event.stopPropagation();" title="Go to Floor View" style="margin-left:0.7em; cursor:pointer; font-size:1.3em; padding-left:0.5em;">&#8594;</span>
+        </div>
+        <div class="accordion-body" *ngIf="floorAccordion[i]">
+          <ul style="margin:0; padding-left:1.2em;">
+            <li *ngFor="let user of getUsersForFloor(i+1)">
+              {{ user.name }} ({{ user.email }})
+            </li>
+          </ul>
+          <div style="margin-top: 0.7em;">
+            <button (click)="toggleTesting(i); $event.stopPropagation();" [ngClass]="{'testing-btn': true, 'active': floorTesting[i]}">
+              Testing: <b>{{ floorTesting[i] ? 'true' : 'false' }}</b>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="floor-list">
-        <strong>Floors:</strong>
-        <button *ngFor="let floor of sensorData; let i = index" (click)="selectFloor(i+1)">
-          Floor {{ i + 1 }}
-        </button>
-      </div>
     </div>
-    <div *ngIf="selectedFloor !== null">
-      <button (click)="showBuildingView()">&larr; Back to Building View</button>
-      <h3>Floor {{ selectedFloor }}</h3>
-      <div class="floor-users" *ngIf="getUsersForFloor(selectedFloor).length">
-        <strong>Users on this floor:</strong>
-        <ul>
-          <li *ngFor="let user of getUsersForFloor(selectedFloor)">
-            {{ user.name }} ({{ user.email }})
-          </li>
-        </ul>
+  </div>
+    <div class="dashboard-right">
+    <h2>Sensor Dashboard</h2>
+    <div *ngIf="loading">Loading...</div>
+    <div *ngIf="error">{{ error }}</div>
+    <div *ngIf="!loading && !error">
+      <div class="building-view" *ngIf="selectedFloor === null">
+        <h3>Building Level View (Averages)</h3>
+        <div class="card-container">
+          <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData())" [ngClass]="sensor.status">
+            <div class="sensor-icon">{{ sensor.icon }}</div>
+            <div class="sensor-type">{{ sensor.label }}</div>
+            <div class="sensor-value">{{ sensor.value }}</div>
+            <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+          </div>
+        </div>
       </div>
-      <div style="margin-bottom: 1em;">
-        <label style="display: flex; align-items: center; gap: 1em;">
-          <span>Fire Alarm:</span>
-          <input type="checkbox" [checked]="fireAlarmToggle" (change)="onFireAlarmToggle($event)">
-          <span>{{ fireAlarmToggle ? 'Active' : 'Inactive' }}</span>
-        </label>
-        <span *ngIf="alarmEmailStatus">{{ alarmEmailStatus }}</span>
-      </div>
-      <div class="card-container">
-        <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1])" [ngClass]="sensor.status">
-          <div class="sensor-icon">{{ sensor.icon }}</div>
-          <div class="sensor-type">{{ sensor.label }}</div>
-          <div class="sensor-value">{{ sensor.value }}</div>
-          <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+      <div *ngIf="selectedFloor !== null">
+        <button class="icon-back-btn" (click)="showBuildingView()" title="Back to Building View">
+          <span style="font-size:1.3em; vertical-align:middle;">&#8592;</span>
+          <span style="margin-left:0.5em; vertical-align:middle; font-weight:600;">Building View</span>
+        </button>
+        <h3>Floor {{ selectedFloor }}</h3>
+        <div class="card-container">
+          <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1])" [ngClass]="sensor.status">
+            <div class="sensor-icon">{{ sensor.icon }}</div>
+            <div class="sensor-type">{{ sensor.label }}</div>
+            <div class="sensor-value">{{ sensor.value }}</div>
+            <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+          </div>
         </div>
       </div>
     </div>
