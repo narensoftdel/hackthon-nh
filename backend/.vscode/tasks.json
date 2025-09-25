@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Node.js App",
+			"type": "shell",
+			"command": "npm start",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Start Emergency Evacuation System Backend",
+			"type": "shell",
+			"command": "npm start",
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}
