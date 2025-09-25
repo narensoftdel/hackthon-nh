@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { SensorService } from './services/sensor.service';
 // import { SensorService } from '../services/sensor.service';
 
@@ -49,7 +50,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private sensorService: SensorService) {}
+  // Handler for Evacuate button
+  onEvacuate() {
+    this.router.navigate(['/floor-plan']);
+  }
+
+  constructor(private sensorService: SensorService, private router: Router) {}
 
   ngOnInit(): void {
     this.fetchSensorData();
