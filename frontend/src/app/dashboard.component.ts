@@ -1,3 +1,4 @@
+// ...existing code...
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SensorService } from './services/sensor.service';
@@ -13,6 +14,41 @@ import { SensorService } from './services/sensor.service';
 
 
 export class DashboardComponent implements OnInit, OnDestroy {
+
+  triggerFireAlarm(idx: number) {
+    const floorNum = idx + 1;
+    this.sensorService.setFireAlarm(floorNum, true).subscribe({
+      next: () => {
+        this.fetchSensorData();
+      },
+      error: () => {
+        this.error = 'Failed to trigger fire alarm.';
+      }
+    });
+  }
+
+  resetFireAlarm(idx: number) {
+    const floorNum = idx + 1;
+    this.sensorService.setFireAlarm(floorNum, false).subscribe({
+      next: () => {
+        this.fetchSensorData();
+      },
+      error: () => {
+        this.error = 'Failed to reset fire alarm.';
+      }
+    });
+  }
+  sendAlarmToAll() {
+    this.alarmEmailStatus = 'Sending fire alarm email to all users...';
+    this.sensorService.sendAlarmEmail('active').subscribe({
+      next: (res: any) => {
+        this.alarmEmailStatus = 'Alarm email sent to all users.';
+      },
+      error: (err: any) => {
+        this.alarmEmailStatus = 'Failed to send alarm email.';
+      }
+    });
+  }
   buildingExpanded = true;
   floorAccordion: boolean[] = [];
   floorTesting: boolean[] = [];

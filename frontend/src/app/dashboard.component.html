@@ -2,6 +2,9 @@
   <button class="evacuate-btn" (click)="onEvacuate()" title="Evacuate Now">
     🚨 Evacuate
   </button>
+  <button class="alarm-btn" (click)="sendAlarmToAll()" title="Trigger Fire Alarm Email" style="margin-left:1em; background:#b71c1c; color:#fff; font-weight:600; border-radius:6px; padding:0.6em 1.2em; font-size:1em;">
+    🔔 Alarm
+  </button>
   <div class="dashboard-left">
     <h2>Floors & Users</h2>
     <div class="accordion-list">
@@ -18,10 +21,12 @@
               {{ user.name }} ({{ user.email }})
             </li>
           </ul>
-          <div style="margin-top: 0.7em;">
+          <div style="margin-top: 0.7em; display: flex; gap: 0.5em; align-items: center;">
             <button (click)="toggleTesting(i); $event.stopPropagation();" [ngClass]="{'testing-btn': true, 'active': floorTesting[i]}">
               Testing: <b>{{ floorTesting[i] ? 'true' : 'false' }}</b>
             </button>
+            <button (click)="triggerFireAlarm(i); $event.stopPropagation();" [disabled]="sensorData[i]?.fireAlarm" style="background:#b71c1c; color:#fff; border-radius:5px; padding:0.3em 0.8em; font-weight:600;">Trigger</button>
+            <button (click)="resetFireAlarm(i); $event.stopPropagation();" [disabled]="!sensorData[i]?.fireAlarm" style="background:#388e3c; color:#fff; border-radius:5px; padding:0.3em 0.8em; font-weight:600;">Reset</button>
           </div>
         </div>
       </div>
