@@ -1,3 +1,42 @@
+.sensor-card-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  width: 100%;
+}
+.sensor-card-row-bottom {
+  margin-bottom: 0.2em;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.2em;
+}
+.sensor-range-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 120px;
+  margin-left: 1.2em;
+  gap: 0.13em;
+}
+.sensor-range-item {
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 0.13em 0.7em;
+  font-size: 0.92em;
+  font-weight: 500;
+  text-align: right;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+.sensor-range-item.good {
+  color: #388e3c;
+}
+.sensor-range-item.concern {
+  color: #ffa000;
+}
+.sensor-range-item.poor {
+  color: #d32f2f;
+}
 .evacuate-btn {
   position: absolute;
   top: 2.2rem;

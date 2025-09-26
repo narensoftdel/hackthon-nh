@@ -31,18 +31,30 @@ function sendWarningEmail(to, userName, floor, type, value, isBuildingLevel = fa
 	let subject = '';
 	let text = '';
 	let html = '';
-	if (type === 'temperature') {
-		subject = `Temperature Alert for Floor ${floor}`;
-		text = `Warning: The temperature on floor ${floor} has reached ${value.toFixed(2)}°C. Please take necessary action.`;
-		html = `
-		<div style="font-family: Arial, sans-serif; background: #f7f7f7; padding: 24px; border-radius: 10px; max-width: 480px; margin: auto;">
-		  <h2 style="color: #d84315;">Temperature Alert 🚨</h2>
-		  <p style="font-size: 1.1em; color: #333;">The temperature on <b>Floor ${floor}</b> has reached <span style='color:#d84315;font-weight:bold;'>${value.toFixed(2)}°C</span>.</p>
-		  <p style="color: #444;">Please take necessary action to ensure safety.</p>
-		  <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
-		  <div style="font-size:0.95em; color:#888;">Emergency Evacuation System</div>
-		</div>
-		`;
+		if (type === 'temperature') {
+				subject = `Temperature Alert for Floor ${floor}`;
+				text = `Warning: The temperature on floor ${floor} has reached ${value.toFixed(2)}°C. Please take necessary action.`;
+				html = `
+				<div style="font-family: Arial, sans-serif; background: #f7f7f7; padding: 24px; border-radius: 10px; max-width: 480px; margin: auto;">
+					<h2 style="color: #d84315;">Temperature Alert 🚨</h2>
+					<p style="font-size: 1.1em; color: #333;">The temperature on <b>Floor ${floor}</b> has reached <span style='color:#d84315;font-weight:bold;'>${value.toFixed(2)}°C</span>.</p>
+					<p style="color: #444;">Please take necessary action to ensure safety.</p>
+					<hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+					<div style="font-size:0.95em; color:#888;">Emergency Evacuation System</div>
+				</div>
+				`;
+		} else if (type === 'tvoc') {
+				subject = `TVOC Alert for Floor ${floor}`;
+				text = `Warning: The TVOC level on floor ${floor} has reached ${value}. Please check the HVAC systems.`;
+				html = `
+				<div style="font-family: Arial, sans-serif; background: #fff3e0; padding: 24px; border-radius: 10px; max-width: 480px; margin: auto; border: 2px solid #ff7043;">
+					<h2 style="color: #b71c1c;">TVOC Alert 🚨</h2>
+					<p style="font-size: 1.1em; color: #b71c1c;">The TVOC level on <b>Floor ${floor}</b> has reached <span style='color:#b71c1c;font-weight:bold;'>${value}</span>.</p>
+					<p style="color: #b71c1c; font-weight: bold;">Please check the HVAC systems immediately!</p>
+					<hr style="border:none; border-top:1px solid #ff7043; margin:16px 0;">
+					<div style="font-size:0.95em; color:#888;">Emergency Evacuation System</div>
+				</div>
+				`;
 	} else if (type === 'fireAlarm') {
 		const floorText = isBuildingLevel ? 'the building' : `Floor ${floor}`;
 		subject = isBuildingLevel ? `FIRE ALARM ACTIVE in Building` : `FIRE ALARM ACTIVE on Floor ${floor}`;
@@ -69,6 +81,18 @@ function sendWarningEmail(to, userName, floor, type, value, isBuildingLevel = fa
 				<p style="margin-top:1.5em; color:#333;">Stay safe,<br><b>Code Doctors Team</b></p>
 				<hr style="border:none; border-top:1px solid #ff7043; margin:16px 0;">
 				<div style="font-size:0.95em; color:#888;">Emergency Evacuation System</div>
+			</div>
+		`;
+	} else if (type === 'smoke') {
+		subject = `Smoke Detected on Floor ${floor}`;
+		text = `Alert: Smoke has been detected on floor ${floor}. Immediate attention required!`;
+		html = `
+			<div style=\"font-family: Arial, sans-serif; background: #fff3e0; padding: 24px; border-radius: 10px; max-width: 540px; margin: auto; border: 2px solid #ff7043;\">
+				<h2 style=\"color: #b71c1c;\">Smoke Detected 🚨</h2>
+				<p style=\"font-size: 1.1em; color: #b71c1c;\">Smoke has been <b>detected</b> on <b>Floor ${floor}</b> at <b>${new Date().toLocaleTimeString()}</b>.</p>
+				<p style=\"color: #b71c1c; font-weight: bold;\">Please investigate immediately and take necessary action!</p>
+				<hr style=\"border:none; border-top:1px solid #ff7043; margin:16px 0;\">
+				<div style=\"font-size:0.95em; color:#888;\">Emergency Evacuation System</div>
 			</div>
 		`;
 	}
@@ -115,6 +139,7 @@ function checkAndSendTemperatureWarnings() {
 const users = [
 	{ name: 'Deepak', email: 'deepak.wadkar@softdel.com', floor: 1 , role: 'admin'},
 	{ name: 'Narendra', email: 'narendra.hinge@softdel.com', floor: 2 , role: 'nmUser'},
+	{ name: 'Dattatray', email: 'dattatray.dethe@softdel.com', floor: 2 , role: 'admin'},
 	{ name: 'Dhanashri', email: 'dhanashri.sonawane@softdel.com', floor: 3 , role: 'nmUser'},
 	{ name: 'Tejswini', email: 'dhanashri.sonawane@softdel.com', floor: 2 , role: 'nmUser'},
 	{ name: 'Alex', email: 'alex.sonawane@softdel.com', floor: 3 , role: 'nmUser'},
@@ -229,25 +254,39 @@ let floorTesting = [false, false, false];
 
 // Randomize dummy data for each floor every 5 seconds
 setInterval(() => {
-	for (let idx = 0; idx < sensorData.length; idx++) {
-		if (floorTesting[idx]) continue; // skip if testing
-		// Update sensor data for this floor
-		sensorData[idx] = randomizeFloorData(idx + 1);
-		// Email logic (if needed, e.g. for demo)
-		const floorNum = idx + 1;
-		const floorUsers = users.filter(u => u.floor === floorNum);
-		const floorData = sensorData[idx];
-		if (floorData.temperature > 30) {
-			floorUsers.forEach(user => {
-				//sendWarningEmail(user.email, floorNum, 'temperature', floorData.temperature);
-			});
-		}
-		if (floorData.fireAlarm) {
-			floorUsers.forEach(user => {
-				//sendWarningEmail(user.email, floorNum, 'fireAlarm', true);
-			});
-		}
-	}
+    for (let idx = 0; idx < sensorData.length; idx++) {
+        if (floorTesting[idx]) continue; // skip if testing
+        // Update sensor data for this floor
+        sensorData[idx] = randomizeFloorData(idx + 1);
+        // Email logic (if needed, e.g. for demo)
+        const floorNum = idx + 1;
+        const floorUsers = users.filter(u => u.floor === floorNum);
+        const floorData = sensorData[idx];
+        if (floorData.temperature > 30) {
+            floorUsers.forEach(user => {
+                //sendWarningEmail(user.email, floorNum, 'temperature', floorData.temperature);
+            });
+        }
+        if (floorData.fireAlarm) {
+            floorUsers.forEach(user => {
+                //sendWarningEmail(user.email, floorNum, 'fireAlarm', true);
+            });
+        }
+        // Smoke detection: notify all admin users if smoke is detected
+        if (floorData.smokeDetected) {
+            const adminUsers = users.filter(u => u.role === 'admin');
+            adminUsers.forEach(admin => {
+                sendWarningEmail(
+                    admin.email,
+                    admin.name,
+                    floorNum,
+                    'smoke',
+                    'detected',
+                    false
+                );
+            });
+        }
+    }
 }, 5000);
 
 
@@ -308,6 +347,24 @@ app.post('/api/floor-fire-alarm', (req, res) => {
 		floorTesting[floor - 1] = false;
 	}
 	res.json({ message: `Fire alarm for floor ${floor} set to ${fireAlarm}` });
+});
+
+
+// API endpoint to simulate TVOC spike and notify admin
+// Usage: POST /api/simulate-tvoc { floor: 1 | 2 | 3 }
+app.post('/api/simulate-tvoc', (req, res) => {
+	const { floor } = req.body;
+	if (![1, 2, 3].includes(floor)) {
+		return res.status(400).json({ error: 'Invalid floor value' });
+	}
+	// Simulate a TVOC spike for the floor
+	sensorData[floor - 1].tvoc = 1000 + Math.floor(Math.random() * 500); // Set to a high value
+	// Find admin user(s)
+	const adminUsers = users.filter(u => u.role === 'admin');
+	adminUsers.forEach(admin => {
+		sendWarningEmail(admin.email, admin.name, floor, 'tvoc', sensorData[floor - 1].tvoc, false);
+	});
+	res.json({ message: `TVOC spike simulated for floor ${floor} and admin notified.` });
 });
 
 app.listen(PORT, () => {

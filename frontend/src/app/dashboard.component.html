@@ -27,6 +27,7 @@
             </button>
             <button (click)="triggerFireAlarm(i); $event.stopPropagation();" [disabled]="sensorData[i]?.fireAlarm" style="background:#b71c1c; color:#fff; border-radius:5px; padding:0.3em 0.8em; font-weight:600;">Trigger</button>
             <button (click)="resetFireAlarm(i); $event.stopPropagation();" [disabled]="!sensorData[i]?.fireAlarm" style="background:#388e3c; color:#fff; border-radius:5px; padding:0.3em 0.8em; font-weight:600;">Reset</button>
+            <button (click)="simulateTvoc(i); $event.stopPropagation();" style="background:#ff9800; color:#fff; border-radius:5px; padding:0.3em 0.8em; font-weight:600;">Simulate TVOC</button>
           </div>
         </div>
       </div>
@@ -42,25 +43,53 @@
         <div class="card-group">
           <div class="card-container">
             <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData()).group1" [ngClass]="sensor.status">
-              <div class="sensor-icon">{{ sensor.icon }}</div>
-              <div class="sensor-type">{{ sensor.label }}</div>
-              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-card-row">
+                <span class="sensor-icon">{{ sensor.icon }}</span>
+                <span class="sensor-type">{{ sensor.label }}</span>
+              </div>
+              <div class="sensor-card-row sensor-card-row-bottom">
+                <div style="display:flex; flex-direction:column; align-items:flex-start; flex:1;">
+                  <span class="sensor-value">{{ sensor.value }}</span>
+                </div>
+                <div class="sensor-range-stack" *ngIf="sensor.range">
+                  <ng-container *ngFor="let r of getStackedRanges(sensor.label)">
+                    <span class="sensor-range-item" [ngClass]="r.type">{{ r.text }}</span>
+                  </ng-container>
+                </div>
+              </div>
               <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
             </div>
           </div>
           <div class="card-container">
             <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData()).group2" [ngClass]="sensor.status">
-              <div class="sensor-icon">{{ sensor.icon }}</div>
-              <div class="sensor-type">{{ sensor.label }}</div>
-              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-card-row">
+                <span class="sensor-icon">{{ sensor.icon }}</span>
+                <span class="sensor-type">{{ sensor.label }}</span>
+              </div>
+              <div class="sensor-card-row sensor-card-row-bottom">
+                <div style="display:flex; flex-direction:column; align-items:flex-start; flex:1;">
+                  <span class="sensor-value">{{ sensor.value }}</span>
+                </div>
+                <div class="sensor-range-stack" *ngIf="sensor.label === 'Temperature' || sensor.label === 'Humidity'">
+                  <ng-container *ngFor="let r of getStackedRanges(sensor.label)">
+                    <span class="sensor-range-item" [ngClass]="r.type">{{ r.text }}</span>
+                  </ng-container>
+                </div>
+                <span class="sensor-range" *ngIf="sensor.range && sensor.label !== 'Temperature' && sensor.label !== 'Humidity'">{{ sensor.range }}</span>
+              </div>
               <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
             </div>
           </div>
           <div class="card-container">
             <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData()).misc" [ngClass]="sensor.status">
-              <div class="sensor-icon">{{ sensor.icon }}</div>
-              <div class="sensor-type">{{ sensor.label }}</div>
-              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-card-row">
+                <span class="sensor-icon">{{ sensor.icon }}</span>
+                <span class="sensor-type">{{ sensor.label }}</span>
+              </div>
+              <div class="sensor-card-row sensor-card-row-bottom">
+                <span class="sensor-value">{{ sensor.value }}</span>
+                <span class="sensor-range" *ngIf="sensor.range">{{ sensor.range }}</span>
+              </div>
               <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
             </div>
           </div>
@@ -75,26 +104,48 @@
         <div class="card-group">
           <div class="card-container">
             <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1]).group1" [ngClass]="sensor.status">
-              <div class="sensor-icon">{{ sensor.icon }}</div>
-              <div class="sensor-type">{{ sensor.label }}</div>
-              <div class="sensor-value">{{ sensor.value }}</div>
-              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+              <div style="display:flex; align-items:center; gap:0.7em; width:100%;">
+                <span class="sensor-icon" style="font-size:1.7em;">{{ sensor.icon }}</span>
+                <span class="sensor-type" style="font-weight:600; font-size:1.1em;">{{ sensor.label }}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.7em; width:100%; justify-content:space-between;">
+                <span class="sensor-value" style="font-size:1.25em; font-weight:500;">{{ sensor.value }}</span>
+                <span class="sensor-range" *ngIf="sensor.range" style="background:linear-gradient(90deg,#f5f5f5 70%,#e3f2fd 100%); border-radius:6px; padding:0.18em 0.9em; font-size:0.92em; color:#1976d2; font-weight:500; min-width:120px; text-align:right; letter-spacing:0.01em;">{{ sensor.range }}</span>
+              </div>
+              <div class="sensor-meta" *ngIf="sensor.meta" style="font-size:0.93em; color:#888; margin-top:0.1em;">{{ sensor.meta }}</div>
             </div>
           </div>
           <div class="card-container">
             <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1]).group2" [ngClass]="sensor.status">
-              <div class="sensor-icon">{{ sensor.icon }}</div>
-              <div class="sensor-type">{{ sensor.label }}</div>
-              <div class="sensor-value">{{ sensor.value }}</div>
-              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+              <div style="display:flex; align-items:center; gap:0.7em; width:100%;">
+                <span class="sensor-icon" style="font-size:1.7em;">{{ sensor.icon }}</span>
+                <span class="sensor-type" style="font-weight:600; font-size:1.1em;">{{ sensor.label }}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.7em; width:100%; justify-content:space-between;">
+                <div style="display:flex; flex-direction:column; align-items:flex-start; flex:1;">
+                  <span class="sensor-value" style="font-size:1.25em; font-weight:500;">{{ sensor.value }}</span>
+                </div>
+                <div class="sensor-range-stack" *ngIf="sensor.label === 'Temperature' || sensor.label === 'Humidity'">
+                  <ng-container *ngFor="let r of getStackedRanges(sensor.label)">
+                    <span class="sensor-range-item" [ngClass]="r.type">{{ r.text }}</span>
+                  </ng-container>
+                </div>
+                <span class="sensor-range" *ngIf="sensor.range && sensor.label !== 'Temperature' && sensor.label !== 'Humidity'" style="background:linear-gradient(90deg,#f5f5f5 70%,#e3f2fd 100%); border-radius:6px; padding:0.18em 0.9em; font-size:0.92em; color:#1976d2; font-weight:500; min-width:120px; text-align:right; letter-spacing:0.01em;">{{ sensor.range }}</span>
+              </div>
+              <div class="sensor-meta" *ngIf="sensor.meta" style="font-size:0.93em; color:#888; margin-top:0.1em;">{{ sensor.meta }}</div>
             </div>
           </div>
           <div class="card-container">
             <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1]).misc" [ngClass]="sensor.status">
-              <div class="sensor-icon">{{ sensor.icon }}</div>
-              <div class="sensor-type">{{ sensor.label }}</div>
-              <div class="sensor-value">{{ sensor.value }}</div>
-              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+              <div style="display:flex; align-items:center; gap:0.7em; width:100%;">
+                <span class="sensor-icon" style="font-size:1.7em;">{{ sensor.icon }}</span>
+                <span class="sensor-type" style="font-weight:600; font-size:1.1em;">{{ sensor.label }}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.7em; width:100%; justify-content:space-between;">
+                <span class="sensor-value" style="font-size:1.25em; font-weight:500;">{{ sensor.value }}</span>
+                <span class="sensor-range" *ngIf="sensor.range" style="background:linear-gradient(90deg,#f5f5f5 70%,#e3f2fd 100%); border-radius:6px; padding:0.18em 0.9em; font-size:0.92em; color:#1976d2; font-weight:500; min-width:120px; text-align:right; letter-spacing:0.01em;">{{ sensor.range }}</span>
+              </div>
+              <div class="sensor-meta" *ngIf="sensor.meta" style="font-size:0.93em; color:#888; margin-top:0.1em;">{{ sensor.meta }}</div>
             </div>
           </div>
         </div>

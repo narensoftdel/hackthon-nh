@@ -30,4 +30,8 @@ export class SensorService {
   setFireAlarm(floor: number, fireAlarm: boolean): Observable<any> {
     return this.http.post<any>('http://localhost:3000/api/floor-fire-alarm', { floor, fireAlarm });
   }
+
+  simulateTvoc(floor: number): Observable<any> {
+    return this.http.post<any>('http://localhost:3000/api/simulate-tvoc', { floor });
+  }
 }

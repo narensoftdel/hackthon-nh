@@ -1,9 +1,7 @@
-// ...existing code...
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SensorService } from './services/sensor.service';
 // import { SensorService } from '../services/sensor.service';
-
 
 @Component({
   selector: 'app-dashboard',
@@ -12,8 +10,61 @@ import { SensorService } from './services/sensor.service';
   styleUrls: ['./dashboard.component.scss']
 })
 
-
 export class DashboardComponent implements OnInit, OnDestroy {
+  // ...existing code...
+
+  public getStackedRanges(label: string) {
+    // Map label to type for range
+    const typeMap: any = {
+      'TVOC': 'tvoc',
+      'CO₂': 'co2',
+      'Temperature': 'temperature',
+      'Humidity': 'humidity',
+      'PM2.5': 'pm25',
+      'PM10': 'pm10'
+    };
+    const type = typeMap[label];
+    switch (type) {
+      case 'tvoc':
+        return [
+          { type: 'good', text: 'Good: <300' },
+          { type: 'concern', text: 'Concern: <700' },
+          { type: 'poor', text: 'Poor: ≥700 (ppb)' }
+        ];
+      case 'co2':
+        return [
+          { type: 'good', text: 'Good: <800' },
+          { type: 'concern', text: 'Concern: <1200' },
+          { type: 'poor', text: 'Poor: ≥1200 (ppm)' }
+        ];
+      case 'temperature':
+        return [
+          { type: 'good', text: 'Good: 20-26°C' },
+          { type: 'concern', text: 'Concern: 18-20°C or 26-28°C' },
+          { type: 'poor', text: 'Poor: <18°C or >28°C' }
+        ];
+      case 'humidity':
+        return [
+          { type: 'good', text: 'Good: 30-60%' },
+          { type: 'concern', text: 'Concern: 20-30% or 60-70%' },
+          { type: 'poor', text: 'Poor: <20% or >70%' }
+        ];
+      case 'pm25':
+        return [
+          { type: 'good', text: 'Good: <35' },
+          { type: 'concern', text: 'Concern: <75' },
+          { type: 'poor', text: 'Poor: ≥75 (µg/m³)' }
+        ];
+      case 'pm10':
+        return [
+          { type: 'good', text: 'Good: <50' },
+          { type: 'concern', text: 'Concern: <150' },
+          { type: 'poor', text: 'Poor: ≥150 (µg/m³)' }
+        ];
+      default:
+        return [];
+    }
+  }
 
   triggerFireAlarm(idx: number) {
     const floorNum = idx + 1;
@@ -169,26 +220,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getSensorCards(floorData: any) {
     if (!floorData) return { group1: [], group2: [], misc: [] };
-  const formatTemp = (v: any) => typeof v === 'number' ? v.toFixed(2) : v;
-  const formatInt = (v: any) => typeof v === 'number' ? Math.round(v) : (v === undefined || v === null ? '--' : v);
+    const formatTemp = (v: any) => typeof v === 'number' ? v.toFixed(2) : v;
+    const formatInt = (v: any) => typeof v === 'number' ? Math.round(v) : (v === undefined || v === null ? '--' : v);
     return {
       group1: [
-        { icon: '🌫️', label: 'TVOC', value: formatInt(floorData.tvoc), meta: 'Air Quality (ppb)', status: this.getCardStatus('tvoc', floorData.tvoc) },
-        { icon: '☁️', label: 'CO₂', value: formatInt(floorData.co2), meta: 'CO₂ Level (ppm)', status: this.getCardStatus('co2', floorData.co2) },
-        { icon: '🟤', label: 'PM2.5', value: formatInt(floorData.pm25) + ' µg/m³', meta: 'Fine Particles', status: this.getCardStatus('pm25', floorData.pm25) },
-        { icon: '⚪', label: 'PM10', value: formatInt(floorData.pm10) + ' µg/m³', meta: 'Coarse Particles', status: this.getCardStatus('pm10', floorData.pm10) }
+        { icon: '🌫️', label: 'TVOC', value: formatInt(floorData.tvoc), meta: 'Air Quality (ppb)', status: this.getCardStatus('tvoc', floorData.tvoc), range: this.getCardRange('tvoc') },
+        { icon: '☁️', label: 'CO₂', value: formatInt(floorData.co2), meta: 'CO₂ Level (ppm)', status: this.getCardStatus('co2', floorData.co2), range: this.getCardRange('co2') },
+        { icon: '🟤', label: 'PM2.5', value: formatInt(floorData.pm25) + ' µg/m³', meta: 'Fine Particles', status: this.getCardStatus('pm25', floorData.pm25), range: this.getCardRange('pm25') },
+        { icon: '⚪', label: 'PM10', value: formatInt(floorData.pm10) + ' µg/m³', meta: 'Coarse Particles', status: this.getCardStatus('pm10', floorData.pm10), range: this.getCardRange('pm10') }
       ],
       group2: [
-        { icon: '🌡️', label: 'Temperature', value: formatTemp(floorData.temperature) + ' °C', meta: 'Ambient', status: this.getCardStatus('temperature', floorData.temperature) },
-  { icon: '💧', label: 'Humidity', value: (typeof floorData.humidity === 'number' && !isNaN(floorData.humidity) ? formatInt(floorData.humidity) + ' %' : '--'), meta: 'Relative Humidity', status: this.getCardStatus('humidity', floorData.humidity) },
-  { icon: '🚨', label: 'Fire Alarm', value: floorData.fireAlarm ? 'Active' : 'Normal', meta: 'Status', status: floorData.fireAlarm ? 'poor' : 'good' },
-        
+        { icon: '🌡️', label: 'Temperature', value: formatTemp(floorData.temperature) + ' °C', meta: 'Ambient', status: this.getCardStatus('temperature', floorData.temperature), range: this.getCardRange('temperature') },
+        { icon: '💧', label: 'Humidity', value: (typeof floorData.humidity === 'number' && !isNaN(floorData.humidity) ? formatInt(floorData.humidity) + ' %' : '--'), meta: 'Relative Humidity', status: this.getCardStatus('humidity', floorData.humidity), range: this.getCardRange('humidity') },
+        { icon: '🚨', label: 'Fire Alarm', value: floorData.fireAlarm ? 'Active' : 'Normal', meta: 'Status', status: floorData.fireAlarm ? 'poor' : 'good', range: '' },
       ],
-
-      misc: [        { icon: '💨', label: 'Smoke Detected', value: floorData.smokeDetected ? 'Yes' : 'No', meta: 'Status', status: floorData.smokeDetected ? 'concern' : 'good' }
+      misc: [
+        { icon: '💨', label: 'Smoke Detected', value: floorData.smokeDetected ? 'Yes' : 'No', meta: 'Status', status: floorData.smokeDetected ? 'concern' : 'good', range: '' }
       ]
+    }
+  }
 
-    }  }
+  getCardRange(type: string): string {
+    switch (type) {
+      case 'tvoc':
+        return 'Good: <300 | Concern: <700 | Poor: ≥700 (ppb)';
+      case 'co2':
+        return 'Good: <800 | Concern: <1200 | Poor: ≥1200 (ppm)';
+      case 'temperature':
+        return 'Good: 20-26°C | Concern: 18-20/26-28 | Poor: <18/>28';
+      case 'humidity':
+        return 'Good: 30-60% | Concern: 20-30/60-70 | Poor: <20/>70';
+      case 'pm25':
+        return 'Good: <35 | Concern: <75 | Poor: ≥75 (µg/m³)';
+      case 'pm10':
+        return 'Good: <50 | Concern: <150 | Poor: ≥150 (µg/m³)';
+      default:
+        return '';
+    }
+  }
 
   getBuildingAvgData() {
     if (!this.sensorData.length) return null;
@@ -289,5 +358,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (floor.fireAlarm) return true;
     if (floor.smokeDetected) return true;
     return false;
+  }
+
+  simulateTvoc(idx: number) {
+    const floorNum = idx + 1;
+    this.sensorService.simulateTvoc(floorNum).subscribe({
+      next: () => {
+        this.fetchSensorData();
+      },
+      error: () => {
+        this.error = 'Failed to simulate TVOC spike.';
+      }
+    });
   }
 }
