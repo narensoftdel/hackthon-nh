@@ -132,32 +132,53 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   getSensorCards(floorData: any) {
-    if (!floorData) return [];
-    const formatTemp = (v: any) => typeof v === 'number' ? v.toFixed(2) : v;
-    const formatInt = (v: any) => typeof v === 'number' ? Math.round(v) : v;
-    return [
-      { icon: '🌫️', label: 'TVOC', value: formatInt(floorData.tvoc), meta: 'Air Quality (ppb)', status: this.getCardStatus('tvoc', floorData.tvoc) },
-      { icon: '☁️', label: 'CO₂', value: formatInt(floorData.co2), meta: 'CO₂ Level (ppm)', status: this.getCardStatus('co2', floorData.co2) },
-      { icon: '🌡️', label: 'Temperature', value: formatTemp(floorData.temperature) + ' °C', status: this.getCardStatus('temperature', floorData.temperature) },
-      { icon: '🚨', label: 'Fire Alarm', value: floorData.fireAlarm ? 'Active' : 'Normal', status: floorData.fireAlarm ? 'poor' : 'good' },
-      { icon: '💨', label: 'Smoke Detected', value: floorData.smokeDetected ? 'Yes' : 'No', status: floorData.smokeDetected ? 'concern' : 'good' }
-    ];
-  }
+    if (!floorData) return { group1: [], group2: [], misc: [] };
+  const formatTemp = (v: any) => typeof v === 'number' ? v.toFixed(2) : v;
+  const formatInt = (v: any) => typeof v === 'number' ? Math.round(v) : (v === undefined || v === null ? '--' : v);
+    return {
+      group1: [
+        { icon: '🌫️', label: 'TVOC', value: formatInt(floorData.tvoc), meta: 'Air Quality (ppb)', status: this.getCardStatus('tvoc', floorData.tvoc) },
+        { icon: '☁️', label: 'CO₂', value: formatInt(floorData.co2), meta: 'CO₂ Level (ppm)', status: this.getCardStatus('co2', floorData.co2) },
+        { icon: '🟤', label: 'PM2.5', value: formatInt(floorData.pm25) + ' µg/m³', meta: 'Fine Particles', status: this.getCardStatus('pm25', floorData.pm25) },
+        { icon: '⚪', label: 'PM10', value: formatInt(floorData.pm10) + ' µg/m³', meta: 'Coarse Particles', status: this.getCardStatus('pm10', floorData.pm10) }
+      ],
+      group2: [
+        { icon: '🌡️', label: 'Temperature', value: formatTemp(floorData.temperature) + ' °C', meta: 'Ambient', status: this.getCardStatus('temperature', floorData.temperature) },
+  { icon: '💧', label: 'Humidity', value: (typeof floorData.humidity === 'number' && !isNaN(floorData.humidity) ? formatInt(floorData.humidity) + ' %' : '--'), meta: 'Relative Humidity', status: this.getCardStatus('humidity', floorData.humidity) },
+  { icon: '🚨', label: 'Fire Alarm', value: floorData.fireAlarm ? 'Active' : 'Normal', meta: 'Status', status: floorData.fireAlarm ? 'poor' : 'good' },
+        
+      ],
+
+      misc: [        { icon: '💨', label: 'Smoke Detected', value: floorData.smokeDetected ? 'Yes' : 'No', meta: 'Status', status: floorData.smokeDetected ? 'concern' : 'good' }
+      ]
+
+    }  }
 
   getBuildingAvgData() {
     if (!this.sensorData.length) return null;
-    const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
+    const avg = (arr: number[]) => {
+      const nums = arr.filter(v => typeof v === 'number' && !isNaN(v));
+      return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+    };
     return {
       tvoc: avg(this.sensorData.map(f => f.tvoc)),
       co2: avg(this.sensorData.map(f => f.co2)),
       temperature: avg(this.sensorData.map(f => f.temperature)),
+      humidity: avg(this.sensorData.map(f => f.humidity)),
+      pm25: avg(this.sensorData.map(f => f.pm25)),
+      pm10: avg(this.sensorData.map(f => f.pm10)),
       fireAlarm: this.sensorData.some(f => f.fireAlarm),
       smokeDetected: this.sensorData.some(f => f.smokeDetected)
     };
   }
 
   getCardStatus(type: string, value: any): 'good' | 'concern' | 'poor' {
-    if (type === 'tvoc') {
+ 
+    if (type === 'humidity') {
+      if (value >= 30 && value <= 60) return 'good';
+      if ((value >= 20 && value < 30) || (value > 60 && value <= 70)) return 'concern';
+      return 'poor';
+    }   if (type === 'tvoc') {
       if (value < 300) return 'good';
       if (value < 700) return 'concern';
       return 'poor';
@@ -172,7 +193,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if ((value >= 18 && value < 20) || (value > 26 && value <= 28)) return 'concern';
       return 'poor';
     }
-    return 'good';
+     if (type === 'pm25') {
+        if (value < 35) return 'good';
+        if (value < 75) return 'concern';
+        return 'poor';
+      }
+      if (type === 'pm10') {
+        if (value < 50) return 'good';
+        if (value < 150) return 'concern';
+        return 'poor';
+      }
+      return 'good';
   }
 
   selectFloor(floor: number) {

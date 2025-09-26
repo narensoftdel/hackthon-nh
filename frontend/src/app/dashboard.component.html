@@ -34,12 +34,30 @@
     <div *ngIf="!loading && !error">
       <div class="building-view" *ngIf="selectedFloor === null">
         <h3>Building Level View (Averages)</h3>
-        <div class="card-container">
-          <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData())" [ngClass]="sensor.status">
-            <div class="sensor-icon">{{ sensor.icon }}</div>
-            <div class="sensor-type">{{ sensor.label }}</div>
-            <div class="sensor-value">{{ sensor.value }}</div>
-            <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+        <div class="card-group">
+          <div class="card-container">
+            <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData()).group1" [ngClass]="sensor.status">
+              <div class="sensor-icon">{{ sensor.icon }}</div>
+              <div class="sensor-type">{{ sensor.label }}</div>
+              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+            </div>
+          </div>
+          <div class="card-container">
+            <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData()).group2" [ngClass]="sensor.status">
+              <div class="sensor-icon">{{ sensor.icon }}</div>
+              <div class="sensor-type">{{ sensor.label }}</div>
+              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+            </div>
+          </div>
+          <div class="card-container">
+            <div class="sensor-card" *ngFor="let sensor of getSensorCards(getBuildingAvgData()).misc" [ngClass]="sensor.status">
+              <div class="sensor-icon">{{ sensor.icon }}</div>
+              <div class="sensor-type">{{ sensor.label }}</div>
+              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -49,12 +67,30 @@
           <span style="margin-left:0.5em; vertical-align:middle; font-weight:600;">Building View</span>
         </button>
         <h3>Floor {{ selectedFloor }}</h3>
-        <div class="card-container">
-          <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1])" [ngClass]="sensor.status">
-            <div class="sensor-icon">{{ sensor.icon }}</div>
-            <div class="sensor-type">{{ sensor.label }}</div>
-            <div class="sensor-value">{{ sensor.value }}</div>
-            <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+        <div class="card-group">
+          <div class="card-container">
+            <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1]).group1" [ngClass]="sensor.status">
+              <div class="sensor-icon">{{ sensor.icon }}</div>
+              <div class="sensor-type">{{ sensor.label }}</div>
+              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+            </div>
+          </div>
+          <div class="card-container">
+            <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1]).group2" [ngClass]="sensor.status">
+              <div class="sensor-icon">{{ sensor.icon }}</div>
+              <div class="sensor-type">{{ sensor.label }}</div>
+              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+            </div>
+          </div>
+          <div class="card-container">
+            <div class="sensor-card" *ngFor="let sensor of getSensorCards(sensorData[selectedFloor-1]).misc" [ngClass]="sensor.status">
+              <div class="sensor-icon">{{ sensor.icon }}</div>
+              <div class="sensor-type">{{ sensor.label }}</div>
+              <div class="sensor-value">{{ sensor.value }}</div>
+              <div class="sensor-meta" *ngIf="sensor.meta">{{ sensor.meta }}</div>
+            </div>
           </div>
         </div>
       </div>

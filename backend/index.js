@@ -134,22 +134,28 @@ app.post('/api/send-alarm-email', (req, res) => {
 // Enable CORS for all origins
 app.use(cors());
 
-// Dummy data state for 3 floors
+
+// Dummy data state for 3 floors (initialize with valid random data)
 let sensorData = [
-	{}, {}, {}
+	randomizeFloorData(1),
+	randomizeFloorData(2),
+	randomizeFloorData(3)
 ];
 
 
 function randomizeFloorData(floor) {
-	return {
-		floor: floor,
-		tvoc: Math.floor(Math.random() * 1000),
-		fireAlarm: Math.random() > 0.8,
-		co2: 400 + Math.floor(Math.random() * 600),
-		temperature: 20 + Math.random() * 10,
-		smokeDetected: Math.random() > 0.85,
-		lastUpdated: new Date().toISOString()
-	};
+       return {
+	       floor: floor,
+	       tvoc: Math.floor(Math.random() * 1000),
+	       fireAlarm: Math.random() > 0.8,
+	       co2: 400 + Math.floor(Math.random() * 600),
+	       temperature: 20 + Math.random() * 10,
+	       humidity: 30 + Math.random() * 50, // Humidity in %
+	       pm25: Math.floor(Math.random() * 200),
+	       pm10: Math.floor(Math.random() * 300),
+	       smokeDetected: Math.random() > 0.85,
+	       lastUpdated: new Date().toISOString()
+       };
 }
 // Track testing state for each floor (true = testing, no mails)
 let floorTesting = [false, false, false];
