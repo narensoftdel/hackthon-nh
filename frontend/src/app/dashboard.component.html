@@ -49,7 +49,17 @@
               </div>
               <div class="sensor-card-row sensor-card-row-bottom">
                 <div style="display:flex; flex-direction:column; align-items:flex-start; flex:1;">
-                  <span class="sensor-value">{{ sensor.value }}</span>
+                  <span class="sensor-value">
+                    <ng-container *ngIf="sensor.label === 'Temperature'">
+                      {{ sensor.value.split(' ')[0] }}<span style="font-size:0.95em; color:#888;"> °C</span>
+                    </ng-container>
+                    <ng-container *ngIf="sensor.label === 'Humidity'">
+                      {{ sensor.value.split(' ')[0] }}<span style="font-size:0.95em; color:#888;"> %</span>
+                    </ng-container>
+                    <ng-container *ngIf="sensor.label !== 'Temperature' && sensor.label !== 'Humidity'">
+                      {{ sensor.value }}
+                    </ng-container>
+                  </span>
                 </div>
                 <div class="sensor-range-stack" *ngIf="sensor.range">
                   <ng-container *ngFor="let r of getStackedRanges(sensor.label)">
@@ -123,7 +133,17 @@
               </div>
               <div style="display:flex; align-items:center; gap:0.7em; width:100%; justify-content:space-between;">
                 <div style="display:flex; flex-direction:column; align-items:flex-start; flex:1;">
-                  <span class="sensor-value" style="font-size:1.25em; font-weight:500;">{{ sensor.value }}</span>
+                  <span class="sensor-value" style="font-size:1.25em; font-weight:500;">
+                    <ng-container *ngIf="sensor.label === 'Temperature'">
+                      {{ sensor.value.split(' ')[0] }}<span style="font-size:0.95em; color:#888;"> °C</span>
+                    </ng-container>
+                    <ng-container *ngIf="sensor.label === 'Humidity'">
+                      {{ sensor.value.split(' ')[0] }}<span style="font-size:0.95em; color:#888;"> %</span>
+                    </ng-container>
+                    <ng-container *ngIf="sensor.label !== 'Temperature' && sensor.label !== 'Humidity'">
+                      {{ sensor.value }}
+                    </ng-container>
+                  </span>
                 </div>
                 <div class="sensor-range-stack" *ngIf="sensor.label === 'Temperature' || sensor.label === 'Humidity'">
                   <ng-container *ngFor="let r of getStackedRanges(sensor.label)">
